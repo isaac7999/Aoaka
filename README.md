@@ -1,115 +1,155 @@
 local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
-local TeleportService = game:GetService("TeleportService")
-local HttpService = game:GetService("HttpService")
 
--- Proteção básica contra detecção
-local function AntiBan()
-    local mt = getrawmetatable(game)
-    local oldIndex = mt.__index
-    setreadonly(mt, false)
-    mt.__index = newcclosure(function(self, key)
-        if key == "Kick" then
-            return function() warn("Tentativa de banimento detectada e bloqueada!") end
-        end
-        return oldIndex(self, key)
-    end)
-    setreadonly(mt, true)
+local player = Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local backpack = player.Backpack
+
+-- Criar Tool (BÍBLIA)
+local bibleTool = Instance.new("Tool")
+bibleTool.Name = "BÍBLIA SAGRADA"
+bibleTool.RequiresHandle = false
+bibleTool.Parent = backpack
+
+-- Criar Bíblia 3D na Mão
+local function createBibleModel()
+    local bible = Instance.new("Part")
+    bible.Size = Vector3.new(2, 3, 0.5)
+    bible.Color = Color3.fromRGB(50, 50, 50)
+    bible.Material = Enum.Material.SmoothPlastic
+    bible.Name = "Bíblia"
+    bible.CanCollide = false
+
+    local mesh = Instance.new("SpecialMesh", bible)
+    mesh.MeshType = Enum.MeshType.Brick
+    mesh.Scale = Vector3.new(1, 1, 0.2)
+
+    local weld = Instance.new("Weld", bible)
+    weld.Part0 = char:FindFirstChild("RightHand") or char:FindFirstChild("Right Arm")
+    weld.Part1 = bible
+    weld.C0 = CFrame.new(0, 0, -1)
+
+    return bible
 end
 
-AntiBan()
+-- Criar Título na Cabeça
+local function createTitle()
+    local billboard = Instance.new("BillboardGui")
+    billboard.Size = UDim2.new(4, 0, 1, 0)
+    billboard.StudsOffset = Vector3.new(0, 3, 0)
+    billboard.Adornee = char.Head
+    billboard.Parent = char.Head
 
--- Criando GUI
-local ScreenGui = Instance.new("ScreenGui")
-local Frame = Instance.new("Frame")
-local Title = Instance.new("TextLabel")
-local MinimizeButton = Instance.new("TextButton")
-local TeleportFacc = Instance.new("TextButton")
-local TeleportPeca = Instance.new("TextButton")
-local TeleportFacc2 = Instance.new("TextButton") -- Novo botão
-local FlyScript = "loadstring(game:HttpGet(\"https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt\"))()"
-
-ScreenGui.Parent = game.CoreGui
-Frame.Parent = ScreenGui
-Frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-Frame.Size = UDim2.new(0, 300, 0, 250) -- Aumente a altura para acomodar o novo botão
-Frame.Position = UDim2.new(0.3, 0, 0.3, 0)
-Frame.Visible = true
-
-Title.Parent = Frame
-Title.Text = "FACILITAR FARM DE PEÇA DE ARMA(AWAYS)"
-Title.Size = UDim2.new(1, 0, 0, 30)
-Title.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-
-MinimizeButton.Parent = Frame
-MinimizeButton.Text = "-"
-MinimizeButton.Size = UDim2.new(0, 30, 0, 30)
-MinimizeButton.Position = UDim2.new(1, -35, 0, 0)
-MinimizeButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-
-TeleportFacc.Parent = Frame
-TeleportFacc.Text = "Teleporte Facc"
-TeleportFacc.Size = UDim2.new(1, -10, 0, 50)
-TeleportFacc.Position = UDim2.new(0, 5, 0, 50)
-TeleportFacc.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
-
-TeleportPeca.Parent = Frame
-TeleportPeca.Text = "Teleporte Peça"
-TeleportPeca.Size = UDim2.new(1, -10, 0, 50)
-TeleportPeca.Position = UDim2.new(0, 5, 0, 110)
-TeleportPeca.BackgroundColor3 = Color3.fromRGB(50, 50, 150)
-
-TeleportFacc2.Parent = Frame
-TeleportFacc2.Text = "Facc 2"  -- Novo texto do botão
-TeleportFacc2.Size = UDim2.new(1, -10, 0, 50)
-TeleportFacc2.Position = UDim2.new(0, 5, 0, 170)  -- Ajuste a posição conforme necessário
-TeleportFacc2.BackgroundColor3 = Color3.fromRGB(150, 50, 150)
-
--- Minimize
-local Minimized = false
-local MinimizeGUI = Instance.new("TextButton")
-MinimizeGUI.Parent = ScreenGui
-MinimizeGUI.Text = "Max"
-MinimizeGUI.Size = UDim2.new(0, 50, 0, 30)
-MinimizeGUI.Position = UDim2.new(0.3, 0, 0.3, 0)
-MinimizeGUI.BackgroundColor3 = Color3.fromRGB(200, 200, 50)
-MinimizeGUI.Visible = false
-
-MinimizeButton.MouseButton1Click:Connect(function()
-    Minimized = not Minimized
-    Frame.Visible = not Minimized
-    MinimizeGUI.Visible = Minimized
-end)
-
-MinimizeGUI.MouseButton1Click:Connect(function()
-    Minimized = false
-    Frame.Visible = true
-    MinimizeGUI.Visible = false
-end)
-
--- Função de Teleporte
-local function TeleportTo(Position)
-    local Character = LocalPlayer.Character
-    if Character and Character:FindFirstChild("HumanoidRootPart") then
-        Character.HumanoidRootPart.CFrame = CFrame.new(Position)
-    end
+    local textLabel = Instance.new("TextLabel", billboard)
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.BackgroundTransparency = 1
+    textLabel.TextScaled = true
+    textLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
+    textLabel.TextStrokeTransparency = 0
+    textLabel.Text = "PROTEGIDO ⚔"
+    textLabel.Font = Enum.Font.GothamBlack
+    return billboard
 end
 
-TeleportFacc.MouseButton1Click:Connect(function()
-    TeleportTo(Vector3.new(-668.4, 23.5, -117.7))
+-- Criar Áurea de Proteção
+local function createAura()
+    local aura = Instance.new("Part")
+    aura.Size = Vector3.new(12, 12, 12) -- Aumentei um pouco mais a áurea
+    aura.Shape = Enum.PartType.Ball
+    aura.Color = Color3.fromRGB(255, 255, 255)
+    aura.Material = Enum.Material.ForceField
+    aura.Transparency = 0.5
+    aura.Anchored = true
+    aura.CanCollide = false
+    aura.Parent = char
+
+    -- Mover áurea com o personagem
+    task.spawn(function()
+        while aura.Parent do
+            if char and char.PrimaryPart then
+                aura.Position = char.PrimaryPart.Position
+            end
+            task.wait(0.1) -- Atualiza posição sem travar
+        end
+    end)
+
+    return aura
+end
+
+-- Sistema de Dano na Áurea (a cada 0.5s para evitar lag)
+local function applyAuraDamage(aura)
+    task.spawn(function()
+        while aura.Parent do
+            for _, enemy in pairs(workspace:GetDescendants()) do
+                if enemy:IsA("Model") and enemy ~= char and enemy:FindFirstChildOfClass("Humanoid") then
+                    local humanoid = enemy:FindFirstChildOfClass("Humanoid")
+                    local rootPart = enemy:FindFirstChild("HumanoidRootPart")
+
+                    if humanoid and rootPart then
+                        local distance = (rootPart.Position - char.PrimaryPart.Position).Magnitude
+                        if distance <= 6 then -- Se estiver dentro da áurea, leva dano
+                            humanoid:TakeDamage(20) -- Dano otimizado
+                        end
+                    end
+                end
+            end
+            task.wait(0.5) -- Aplica dano a cada 0.5s (reduz lag)
+        end
+    end)
+end
+
+-- Auto Cura quando HP menor que 100
+local function autoHeal()
+    task.spawn(function()
+        while char and char:FindFirstChildOfClass("Humanoid") do
+            local humanoid = char:FindFirstChildOfClass("Humanoid")
+            if humanoid.Health < 100 then
+                humanoid.Health = humanoid.Health + 10 -- Cura aumentada
+            end
+            task.wait(1.5) -- Cura a cada 1.5 segundos (evita travamento)
+        end
+    end)
+end
+
+-- Criar Efeitos ao Equipar
+bibleTool.Equipped:Connect(function()
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+
+    local bible = createBibleModel()
+    bible.Parent = char
+
+    local title = createTitle()
+    title.Parent = char.Head
+
+    local aura = createAura()
+    applyAuraDamage(aura)
+    autoHeal() -- Ativa a cura automática
+
+    -- Mudar Animação de Movimento (Flutuação)
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid.WalkSpeed = 8 -- Reduzi a velocidade para parecer flutuação
+        humanoid.JumpPower = 60 -- Mais alto para parecer leve
+    end
 end)
 
-TeleportPeca.MouseButton1Click:Connect(function()
-    TeleportTo(Vector3.new(-1113.4, 28.0, -508.6))
-end)
+-- Remover Efeitos ao Desequipar
+bibleTool.Unequipped:Connect(function()
+    if char then
+        for _, obj in pairs(char:GetChildren()) do
+            if obj:IsA("Part") and (obj.Name == "Bíblia" or obj.Shape == Enum.PartType.Ball) then
+                obj:Destroy()
+            end
+            if obj:IsA("BillboardGui") then
+                obj:Destroy()
+            end
+        end
 
--- Função para o novo botão TeleportFacc2
-TeleportFacc2.MouseButton1Click:Connect(function()
-    TeleportTo(Vector3.new(260.8, 23.5, 529.3))  -- Coordenadas do Facc 2
+        -- Restaurar Movimentação Normal
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = 16
+            humanoid.JumpPower = 50
+        end
+    end
 end)
-
--- Executar Fly
-loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()
